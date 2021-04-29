@@ -5,6 +5,7 @@
 
 struct ConstantBuffer
 {
+	float4x4 wvpMatrix;
 	float4 colorMultiplier;
 };
 

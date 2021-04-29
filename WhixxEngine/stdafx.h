@@ -17,6 +17,7 @@
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
 typedef DirectX::XMFLOAT4 float4;
+typedef DirectX::XMFLOAT4X4 float4x4;
 
 struct Vertex {
     DirectX::XMFLOAT3 pos;

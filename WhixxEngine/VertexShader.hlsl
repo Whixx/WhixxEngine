@@ -14,13 +14,14 @@ struct VS_OUTPUT
 
 cbuffer ConstantBuffer : register(b0)
 {
+    float4x4 wvpMatrix;
     float4 colorMultiplier;
 }
 
 VS_OUTPUT main(VS_INPUT input)
 {
     VS_OUTPUT output;
-    output.pos = float4(input.pos, 1.0f);
+    output.pos = mul(float4(input.pos, 1.0f), wvpMatrix);
     output.color = input.color * colorMultiplier;
 
     return output;
