@@ -16,6 +16,7 @@
 // this will only call release if an object exists (prevents exceptions calling release on non existant objects)
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
+typedef DirectX::XMFLOAT4 float4;
 
 struct Vertex {
     DirectX::XMFLOAT3 pos;

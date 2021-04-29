@@ -1,5 +1,8 @@
 #pragma once
 
+#include "GPUstructs.h"
+
+
 class Renderer
 {
 private:
@@ -25,7 +28,9 @@ private:
 
 	ID3D12DescriptorHeap* rtvDescriptorHeap;
 	ID3D12DescriptorHeap* dsDescriptorHeap;
+	ID3D12DescriptorHeap* mainDescriptorHeap[frameBufferCount]; // this heap will store the descripor to our constant buffer
 
+	ID3D12Resource* constantBufferUploadHeap[frameBufferCount]; // this is the memory on the gpu where our constant buffer will be placed.
 	ID3D12Resource* renderTargets[frameBufferCount];
 	ID3D12Resource* vertexBuffer;
 	ID3D12Resource* indexBuffer;
@@ -33,6 +38,10 @@ private:
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView;
+
+	ConstantBuffer cbColorMultiplierData; // this is the constant buffer data we will send to the gpu
+
+	UINT8* cbColorMultiplierGPUAddress[frameBufferCount]; // this is a pointer to the memory location we get when we map our constant buffer
 
 public:
 	static Renderer* getInstance();
