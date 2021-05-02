@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Renderer.h"
 #include "Window.h"
+#include <d3d12sdklayers.h>
+#include <atlbase.h>
 
 void mainloop();
 
@@ -10,6 +12,24 @@ int WINAPI WinMain(HINSTANCE hInstance,    //Main windows function
     int nShowCmd)
 
 {
+    // Enable the D3D12 debug layer.
+    ID3D12Debug* debugController;
+    if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+    {
+        debugController->EnableDebugLayer();
+            
+    }
+
+    ID3D12Debug* spDebugController0;
+    ID3D12Debug1* spDebugController1;
+    if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&spDebugController0))))
+    {
+        if (SUCCEEDED(spDebugController0->QueryInterface(IID_PPV_ARGS(&spDebugController1))))
+        {
+            spDebugController1->SetEnableGPUBasedValidation(true);
+        }
+    }
+
     Window* window = Window::getInstance();
     // create the window
     if (!window->InitializeWindow(hInstance, nShowCmd))
@@ -38,6 +58,10 @@ int WINAPI WinMain(HINSTANCE hInstance,    //Main windows function
 
     // clean up everything
     renderer->Cleanup();
+
+    SAFE_RELEASE(debugController);
+    SAFE_RELEASE(spDebugController0);
+    SAFE_RELEASE(spDebugController1);
 
     return 0;
 }

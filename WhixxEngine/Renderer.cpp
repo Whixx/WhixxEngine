@@ -917,6 +917,12 @@ void Renderer::Render()
     // has finished because the fence value will be set to "fenceValue" from the GPU since the command
     // queue is being executed on the GPU
     hr = commandQueue->Signal(fence[frameIndex], fenceValue[frameIndex]);
+
+    std::wstring fi = L"FrameIndex: " + std::to_wstring(frameIndex) + L"\n";
+    OutputDebugString(fi.c_str());
+    std::wstring fv = L"FenceValue: " + std::to_wstring(fenceValue[frameIndex]) + L"\n";
+    OutputDebugString(fv.c_str());
+
     if (FAILED(hr))
     {
         Running = false;
@@ -932,54 +938,55 @@ void Renderer::Render()
 
 void Renderer::Cleanup()
 {
-    // close the fence event
-    CloseHandle(fenceEvent);
+    OutputDebugString(L"\nCleanup!\n");
 
     // wait for the gpu to finish all frames
     for (int i = 0; i < frameBufferCount; ++i)
     {
-        frameIndex = i;
+        std::wstring fi = L"Waiting For frame: " + std::to_wstring(i) + L"\n";
+        OutputDebugString(fi.c_str());
+        //frameIndex = i;
         WaitForPreviousFrame();
     }
+
+    // close the fence event
+    CloseHandle(fenceEvent);
 
     // get swapchain out of full screen before exiting
     BOOL fs = false;
     if (swapChain->GetFullscreenState(&fs, NULL))
         swapChain->SetFullscreenState(false, NULL);
 
-    SAFE_RELEASE(device);
-    SAFE_RELEASE(swapChain);
     SAFE_RELEASE(commandQueue);
-    SAFE_RELEASE(rtvDescriptorHeap); 
+    SAFE_RELEASE(rootSignature);
+    SAFE_RELEASE(swapChain);
     SAFE_RELEASE(dsDescriptorHeap);
+    SAFE_RELEASE(rtvDescriptorHeap); 
     SAFE_RELEASE(commandList);
+
+    SAFE_RELEASE(pipelineStateObject);
+    SAFE_RELEASE(depthStencilBuffer);
+    SAFE_RELEASE(vertexBuffer); 
+    SAFE_RELEASE(indexBuffer);
 
     for (int i = 0; i < frameBufferCount; ++i)
     {
         SAFE_RELEASE(renderTargets[i]);
         SAFE_RELEASE(commandAllocator[i]);
         SAFE_RELEASE(fence[i]);
-    };
-
-    for (int i = 0; i < frameBufferCount; ++i)
-    {
         SAFE_RELEASE(mainDescriptorHeap[i]);
         SAFE_RELEASE(constantBufferUploadHeap[i]);
     };
 
-    SAFE_RELEASE(pipelineStateObject);
-    SAFE_RELEASE(rootSignature);
-    SAFE_RELEASE(depthStencilBuffer);
-    SAFE_RELEASE(vertexBuffer); 
-    SAFE_RELEASE(indexBuffer);
+
+    SAFE_RELEASE(device);
 }
 
 void Renderer::WaitForPreviousFrame()
 {
     HRESULT hr;
 
-    // swap the current rtv buffer index so we draw on the correct buffer
-    frameIndex = swapChain->GetCurrentBackBufferIndex();
+    OutputDebugString(L"Waiting For previous Frame!\n");
 
     // if the current fence value is still less than "fenceValue", then we know the GPU has not finished executing
     // the command queue since it has not reached the "commandQueue->Signal(fence, fenceValue)" command
@@ -992,11 +999,18 @@ void Renderer::WaitForPreviousFrame()
             Running = false;
         }
 
+        OutputDebugString(L"\tWaiting For Fence!\n");
         // We will wait until the fence has triggered the event that it's current value has reached "fenceValue". once it's value
         // has reached "fenceValue", we know the command queue has finished executing
         WaitForSingleObject(fenceEvent, INFINITE);
+        OutputDebugString(L"\tFence is Done!\n");
     }
 
+    // swap the current rtv buffer index so we draw on the correct buffer
+    frameIndex = swapChain->GetCurrentBackBufferIndex();
     // increment fenceValue for next frame
     fenceValue[frameIndex]++;
+
+
+    OutputDebugString(L"Previous Frame Done!\n");
 }
